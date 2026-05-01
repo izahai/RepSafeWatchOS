@@ -6,36 +6,7 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		C23F8FBF2F9663540078FD3E /* RepSafe Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C23F8FBE2F9663540078FD3E /* RepSafe Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-/* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		C23F8FC02F9663540078FD3E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C23F8FB22F9663540078FD3E /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C23F8FBD2F9663540078FD3E;
-			remoteInfo = "RepSafe Watch App";
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		C23F8FCE2F9663550078FD3E /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				C23F8FBF2F9663540078FD3E /* RepSafe Watch App.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		C23F8FB82F9663540078FD3E /* RepSafe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RepSafe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C23F8FBE2F9663540078FD3E /* RepSafe Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RepSafe Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -69,7 +40,6 @@
 		C23F8FB92F9663540078FD3E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C23F8FB82F9663540078FD3E /* RepSafe.app */,
 				C23F8FBE2F9663540078FD3E /* RepSafe Watch App.app */,
 			);
 			name = Products;
@@ -78,25 +48,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C23F8FB72F9663540078FD3E /* RepSafe */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C23F8FCF2F9663550078FD3E /* Build configuration list for PBXNativeTarget "RepSafe" */;
-			buildPhases = (
-				C23F8FB62F9663540078FD3E /* Resources */,
-				C23F8FCE2F9663550078FD3E /* Embed Watch Content */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				C23F8FC12F9663540078FD3E /* PBXTargetDependency */,
-			);
-			name = RepSafe;
-			packageProductDependencies = (
-			);
-			productName = RepSafe;
-			productReference = C23F8FB82F9663540078FD3E /* RepSafe.app */;
-			productType = "com.apple.product-type.application.watchapp2-container";
-		};
 		C23F8FBD2F9663540078FD3E /* RepSafe Watch App */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C23F8FCB2F9663550078FD3E /* Build configuration list for PBXNativeTarget "RepSafe Watch App" */;
@@ -129,9 +80,6 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
-					C23F8FB72F9663540078FD3E = {
-						CreatedOnToolsVersion = 26.2;
-					};
 					C23F8FBD2F9663540078FD3E = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -151,20 +99,12 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C23F8FB72F9663540078FD3E /* RepSafe */,
 				C23F8FBD2F9663540078FD3E /* RepSafe Watch App */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		C23F8FB62F9663540078FD3E /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		C23F8FBC2F9663540078FD3E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -183,14 +123,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		C23F8FC12F9663540078FD3E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C23F8FBD2F9663540078FD3E /* RepSafe Watch App */;
-			targetProxy = C23F8FC02F9663540078FD3E /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C23F8FC92F9663550078FD3E /* Debug */ = {
@@ -314,6 +246,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2AWJUBX7RX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = RepSafe;
@@ -335,7 +268,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+				WATCHOS_DEPLOYMENT_TARGET = 10.6;
 			};
 			name = Debug;
 		};
@@ -346,6 +279,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2AWJUBX7RX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = RepSafe;
@@ -368,40 +302,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Release;
-		};
-		C23F8FD02F9663550078FD3E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_KEY_CFBundleDisplayName = RepSafe;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.myowncompany.RepSafe;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		C23F8FD12F9663550078FD3E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_KEY_CFBundleDisplayName = RepSafe;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.myowncompany.RepSafe;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.6;
 			};
 			name = Release;
 		};
@@ -422,15 +323,6 @@
 			buildConfigurations = (
 				C23F8FCC2F9663550078FD3E /* Debug */,
 				C23F8FCD2F9663550078FD3E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C23F8FCF2F9663550078FD3E /* Build configuration list for PBXNativeTarget "RepSafe" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C23F8FD02F9663550078FD3E /* Debug */,
-				C23F8FD12F9663550078FD3E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
