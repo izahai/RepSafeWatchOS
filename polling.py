@@ -6,7 +6,7 @@ import requests
 # =========================
 # SERVER STATE
 # =========================
-state = "OFF" # ON, ALERT, START, COUNT, QUESTION
+state = "OFF" # ON, ALERT, START, COUNT, QUESTION, DESC
 
 app = Flask(__name__)
 
@@ -16,8 +16,8 @@ def status():
     current = state
 
     # AUTO-RESET after sending COUNT
-    if state == "COUNT":
-        state = "ON"   # or "IDLE"
+    if state == "COUNT" or state == "DESC":
+        state = "ON" 
 
     return current
 
@@ -63,7 +63,12 @@ def set_question():
     print("❓ STATE = QUESTION")
     return "OK"
 
-
+@app.route("/desc")
+def set_desc():
+    global state
+    state = "DESC"
+    print("📝 STATE = DESC")
+    return "OK"
 
 # =========================
 # START FLASK SERVER
@@ -110,6 +115,12 @@ def send_question():
         requests.get("http://127.0.0.1:8000/question")
     except:
         print("❌ Server not reachable")
+        
+def send_desc():
+    try:
+        requests.get("http://127.0.0.1:8000/desc")
+    except:
+        print("❌ Server not reachable")
 
 
 def start_ui():
@@ -125,6 +136,7 @@ def start_ui():
     tk.Button(root, text="SET START", command=send_start, width=20, height=2).pack(pady=5)
     tk.Button(root, text="SET COUNT", command=send_count, width=20, height=2).pack(pady=5)
     tk.Button(root, text="SET QUESTION", command=send_question, width=20, height=2).pack(pady=5)
+    tk.Button(root, text="SET DESC", command=send_desc, width=20, height=2).pack(pady=5)
 
     root.mainloop()
 

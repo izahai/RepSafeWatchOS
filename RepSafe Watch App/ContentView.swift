@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import WatchKit
+import AVFoundation
 
 struct ContentView: View {
     var body: some View {
@@ -57,6 +57,9 @@ struct RepCountingView: View {
     @State private var timer: Timer?
     
     @AppStorage("hapticEnabled") private var hapticEnabled = true
+    
+    @AppStorage("voiceEnabled") private var voiceEnabled = false
+    private let speechSynthesizer = AVSpeechSynthesizer()
 
     var body: some View {
         VStack {
@@ -68,11 +71,20 @@ struct RepCountingView: View {
         // Use the conditional extension
         .sensoryFeedback(if: hapticEnabled, .success, trigger: currentReps)
         .onAppear {
+            try? AVAudioSession.sharedInstance().setCategory(.playback)
+            try? AVAudioSession.sharedInstance().setActive(true)
             startPolling()
         }
         .onDisappear {
             stopPolling()
         }
+    }
+    
+    private func speak(_ number: Int) {
+        let utterance = AVSpeechUtterance(string: "\(number)")
+        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
+        utterance.rate = 0.5
+        speechSynthesizer.speak(utterance)
     }
 
     private func startPolling() {
@@ -99,6 +111,10 @@ struct RepCountingView: View {
                 DispatchQueue.main.async {
                     if statusText == "COUNT" && currentReps < targetReps {
                         currentReps += 1
+                        
+                        if voiceEnabled {
+                            speak(currentReps)
+                        }
                     }
                 }
             }
@@ -245,11 +261,15 @@ struct EmergencySOSView: View {
 
 struct SettingsView: View {
     @AppStorage("hapticEnabled") private var hapticEnabled = true
+    @AppStorage("voiceEnabled") private var voiceEnabled = false // NEW
 
     var body: some View {
         Form {
             Toggle("Haptic Feedback", isOn: $hapticEnabled)
                 .toggleStyle(SwitchToggleStyle(tint: .blue))
+
+            Toggle("Voice Counting", isOn: $voiceEnabled) // NEW
+                .toggleStyle(SwitchToggleStyle(tint: .green))
         }
         .navigationTitle("Settings")
     }
