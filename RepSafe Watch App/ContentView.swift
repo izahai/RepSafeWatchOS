@@ -115,6 +115,12 @@ struct RepCountingView: View {
                         if voiceEnabled {
                             speak(currentReps)
                         }
+                    } else if statusText == "DESC" && currentReps > 0 {
+                        currentReps -= 1
+                        
+                        if voiceEnabled {
+                            speak(currentReps)
+                        }
                     }
                 }
             }
@@ -274,6 +280,8 @@ struct SettingsView: View {
         .navigationTitle("Settings")
     }
 }
+
+
 
 #Preview {
     ContentView()
