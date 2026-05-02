@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVFoundation
+import WatchKit
 
 struct ContentView: View {
     var body: some View {
@@ -84,9 +85,9 @@ struct RepCountingView: View {
         let utterance = AVSpeechUtterance(string: "\(number)")
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         utterance.rate = 0.5
+        utterance.volume = 1.0
         speechSynthesizer.speak(utterance)
     }
-
     private func startPolling() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             pollServer()
@@ -281,7 +282,176 @@ struct SettingsView: View {
     }
 }
 
+struct SOSTestCondition1View: View {
+    @State private var countdown = 10
+    @State private var timer: Timer?
+    @Environment(\.dismiss) var dismiss
 
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Emergency Alert")
+                .font(.headline)
+                .foregroundColor(.red)
+
+            Text("Condition 1: Beep sound")
+                .font(.caption2)
+                .foregroundColor(.gray)
+
+            Text("\(countdown)s")
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(.orange)
+
+            Button(action: {
+                cancelSOS()
+            }) {
+                Text("Cancel SOS")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 60)
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+            }
+            .padding(.horizontal)
+        }
+        .navigationTitle("SOS Test 1")
+        .onAppear {
+            startCountdown()
+        }
+        .onDisappear {
+            stopTimer()
+        }
+    }
+
+    private func startCountdown() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            if countdown > 0 {
+                countdown -= 1
+                playBeep()
+            } else {
+                stopTimer()
+            }
+        }
+    }
+
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    private func playBeep() {
+        #if os(watchOS)
+        WKInterfaceDevice.current().play(.click)
+        #else
+        AudioServicesPlaySystemSound(1052)
+        #endif
+    }
+
+    private func cancelSOS() {
+        stopTimer()
+        dismiss()
+    }
+}
+
+struct SOSTestCondition2View: View {
+    @State private var countdown = 10
+    @State private var timer: Timer?
+    @Environment(\.dismiss) var dismiss
+
+    @State private var dragOffset: CGFloat = 0
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Emergency Alert")
+                .font(.headline)
+                .foregroundColor(.red)
+
+            Text("Condition 2: Haptic feedback")
+                .font(.caption2)
+                .foregroundColor(.gray)
+
+            Text("\(countdown)s")
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(.orange)
+
+            GeometryReader { geometry in
+                let maxDrag = geometry.size.width - 60
+                
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 30)
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(height: 50)
+
+                    Text("Swipe right to cancel")
+                        .font(.system(size: 12))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                    RoundedRectangle(cornerRadius: 22)
+                        .fill(Color.red)
+                        .frame(width: 46, height: 46)
+                        .padding(2)
+                        .offset(x: max(0, min(dragOffset, maxDrag)))
+                        .gesture(
+                            DragGesture()
+                                .onChanged { gesture in
+                                    if gesture.translation.width > 0 && gesture.translation.width <= maxDrag {
+                                        dragOffset = gesture.translation.width
+                                    }
+                                }
+                                .onEnded { _ in
+                                    if dragOffset > maxDrag / 2 {
+                                        cancelSOS()
+                                    } else {
+                                        withAnimation(.spring()) {
+                                            dragOffset = 0
+                                        }
+                                    }
+                                }
+                        )
+                }
+            }
+            .frame(height: 50)
+            .padding(.horizontal)
+        }
+        .navigationTitle("SOS Test 2")
+        .onAppear {
+            startCountdown()
+        }
+        .onDisappear {
+            stopTimer()
+        }
+    }
+
+    private func startCountdown() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            if countdown > 0 {
+                countdown -= 1
+                triggerHaptic()
+            } else {
+                stopTimer()
+            }
+        }
+    }
+
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    private func triggerHaptic() {
+        #if os(watchOS)
+        WKInterfaceDevice.current().play(.notification)
+        #endif
+    }
+
+    private func cancelSOS() {
+        stopTimer()
+        dismiss()
+    }
+}
 
 #Preview {
     ContentView()
