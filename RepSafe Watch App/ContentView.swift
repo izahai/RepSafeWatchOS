@@ -33,6 +33,20 @@ struct ContentView: View {
     }
 }
 
+struct RepCountingView: View {
+    let targetReps: Int
+    @State private var currentReps: Int = 0
+
+    var body: some View {
+        VStack {
+            Text("\(currentReps)/\(targetReps)")
+                .font(.system(size: 40, weight: .bold))
+                .foregroundColor(.blue)
+        }
+        .navigationTitle("Counting")
+    }
+}
+
 // MARK: - Device Integration
 
 struct DeviceIntegrationView: View {
@@ -94,6 +108,7 @@ struct DeviceIntegrationView: View {
 
 struct ExerciseTrackingView: View {
     @State private var reps = 12
+    @State private var showCountingView = false
 
     var body: some View {
         ScrollView {
@@ -120,7 +135,7 @@ struct ExerciseTrackingView: View {
                 }
                 
                 Button("Start") {
-                    // Add start functionality here
+                    showCountingView = true
                 }
                 .frame(maxWidth: .infinity)
                 .buttonStyle(.borderedProminent)
@@ -128,6 +143,9 @@ struct ExerciseTrackingView: View {
             .padding()
         }
         .navigationTitle("Workout")
+        .navigationDestination(isPresented: $showCountingView) {
+            RepCountingView(targetReps: reps)
+        }
     }
 }
 
