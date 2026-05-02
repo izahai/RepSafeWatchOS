@@ -5,23 +5,12 @@
 //  Created by Hai Nguyen on 20/4/26.
 //
 
-//import SwiftUI
 //
-//struct ContentView: View {
-//    var body: some View {
-//        VStack {
-//            Image(systemName: "globe")
-//                .imageScale(.large)
-//                .foregroundStyle(.tint)
-//            Text("Hello, world!")
-//        }
-//        .padding()
-//    }
-//}
+//  ContentView.swift
+//  RepSafe Watch App
 //
-//#Preview {
-//    ContentView()
-//}
+//  Created by Hai Nguyen on 20/4/26.
+//
 
 import SwiftUI
 
@@ -29,10 +18,6 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             List {
-                NavigationLink(destination: DeviceIntegrationView()) {
-                    Label("Device Sync", systemImage: "iphone.watchface")
-                }
-
                 NavigationLink(destination: ExerciseTrackingView()) {
                     Label("Workout Tracking", systemImage: "figure.strengthtraining.traditional")
                 }
@@ -45,6 +30,10 @@ struct ContentView: View {
                     Label("Emergency SOS", systemImage: "exclamationmark.triangle.fill")
                         .foregroundColor(.red)
                 }
+                
+                NavigationLink(destination: DeviceIntegrationView()) {
+                    Label("Device Sync", systemImage: "iphone.watchface")
+                }
             }
             .navigationTitle("RepSafe")
         }
@@ -54,7 +43,8 @@ struct ContentView: View {
 // MARK: - Device Integration
 
 struct DeviceIntegrationView: View {
-    @State private var isConnected = true
+    @State private var isConnected = false
+    @State private var statusMessage = "Disconnected from Server"
 
     var body: some View {
         ScrollView {
@@ -63,18 +53,47 @@ struct DeviceIntegrationView: View {
                     .font(.largeTitle)
                     .foregroundColor(isConnected ? .green : .red)
 
-                Text(isConnected ? "Connected to iPhone" : "Disconnected")
+                Text(statusMessage)
                     .font(.headline)
+                    .multilineTextAlignment(.center)
 
-                Toggle("Sync Enabled", isOn: $isConnected)
-
-                Button("Sync Now") {}
-                    .frame(maxWidth: .infinity)
-                    .buttonStyle(.borderedProminent)
+                Button("Sync Now") {
+                    pollServer()
+                }
+                .frame(maxWidth: .infinity)
+                .buttonStyle(.borderedProminent)
             }
             .padding()
         }
         .navigationTitle("Device Sync")
+        .onAppear {
+            // Automatically poll the server when the view appears
+            pollServer()
+        }
+    }
+    
+    private func pollServer() {
+        // Ensure that the IP address matches your local network IP of your laptop
+        guard let url = URL(string: "http://192.168.1.16:8000/status") else { return }
+
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Error connecting to server: \(error)")
+                    self.isConnected = false
+                    self.statusMessage = "Disconnected from Server"
+                    return
+                }
+                
+                if let data = data, let statusText = String(data: data, encoding: .utf8) {
+                    self.isConnected = true
+                    self.statusMessage = "Connected to Server (State: \(statusText.trimmingCharacters(in: .whitespacesAndNewlines)))"
+                } else {
+                    self.isConnected = false
+                    self.statusMessage = "No response from server"
+                }
+            }
+        }.resume()
     }
 }
 

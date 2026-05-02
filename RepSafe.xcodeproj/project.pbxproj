@@ -249,6 +249,7 @@
 				DEVELOPMENT_TEAM = 2AWJUBX7RX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "RepSafe-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = RepSafe;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
@@ -282,6 +283,7 @@
 				DEVELOPMENT_TEAM = 2AWJUBX7RX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "RepSafe-Watch-App-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = RepSafe;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKWatchOnly = YES;
