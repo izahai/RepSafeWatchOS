@@ -33,9 +33,18 @@ struct ContentView: View {
     }
 }
 
+struct APIConfig {
+    static let baseURL = "http://172.20.10.2:8000"
+    
+    static var statusURL: URL? {
+        URL(string: "\(baseURL)/status")
+    }
+}
+
 struct RepCountingView: View {
     let targetReps: Int
     @State private var currentReps: Int = 0
+    @State private var timer: Timer?
 
     var body: some View {
         VStack {
@@ -44,6 +53,42 @@ struct RepCountingView: View {
                 .foregroundColor(.blue)
         }
         .navigationTitle("Counting")
+        .onAppear {
+            startPolling()
+        }
+        .onDisappear {
+            stopPolling()
+        }
+    }
+
+    private func startPolling() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            pollServer()
+        }
+    }
+
+    private func stopPolling() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    private func pollServer() {
+        guard let url = APIConfig.statusURL else { return }
+
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            guard error == nil else { return }
+
+            if let data = data,
+               let statusText = String(data: data, encoding: .utf8)?
+                    .trimmingCharacters(in: .whitespacesAndNewlines) {
+
+                DispatchQueue.main.async {
+                    if statusText == "COUNT" && currentReps < targetReps {
+                        currentReps += 1
+                    }
+                }
+            }
+        }.resume()
     }
 }
 
@@ -81,7 +126,7 @@ struct DeviceIntegrationView: View {
     
     private func pollServer() {
         // Ensure that the IP address matches your local network IP of your laptop
-        guard let url = URL(string: "http://192.168.1.16:8000/status") else { return }
+        guard let url = APIConfig.statusURL else { return }
 
         URLSession.shared.dataTask(with: url) { data, response, error in
             DispatchQueue.main.async {

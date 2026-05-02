@@ -12,7 +12,14 @@ app = Flask(__name__)
 
 @app.route("/status")
 def status():
-    return state
+    global state
+    current = state
+
+    # AUTO-RESET after sending COUNT
+    if state == "COUNT":
+        state = "ON"   # or "IDLE"
+
+    return current
 
 @app.route("/on")
 def turn_on():
