@@ -5,13 +5,6 @@
 //  Created by Hai Nguyen on 20/4/26.
 //
 
-//
-//  ContentView.swift
-//  RepSafe Watch App
-//
-//  Created by Hai Nguyen on 20/4/26.
-//
-
 import SwiftUI
 
 struct ContentView: View {
@@ -101,7 +94,6 @@ struct DeviceIntegrationView: View {
 
 struct ExerciseTrackingView: View {
     @State private var reps = 12
-    @State private var isTracking = true
 
     var body: some View {
         ScrollView {
@@ -112,8 +104,6 @@ struct ExerciseTrackingView: View {
                 Text("\(reps)")
                     .font(.system(size: 40, weight: .bold))
                     .foregroundColor(.blue)
-
-                Toggle("Auto Tracking", isOn: $isTracking)
 
                 HStack {
                     Button("-") {
@@ -128,6 +118,12 @@ struct ExerciseTrackingView: View {
                     .frame(maxWidth: .infinity)
                     .buttonStyle(.bordered)
                 }
+                
+                Button("Start") {
+                    // Add start functionality here
+                }
+                .frame(maxWidth: .infinity)
+                .buttonStyle(.borderedProminent)
             }
             .padding()
         }
