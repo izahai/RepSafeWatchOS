@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WatchKit
 
 struct ContentView: View {
     var body: some View {
@@ -15,10 +16,6 @@ struct ContentView: View {
                     Label("Workout Tracking", systemImage: "figure.strengthtraining.traditional")
                 }
 
-                NavigationLink(destination: FatigueMonitoringView()) {
-                    Label("Fatigue Monitor", systemImage: "heart.text.square")
-                }
-
                 NavigationLink(destination: EmergencySOSView()) {
                     Label("Emergency SOS", systemImage: "exclamationmark.triangle.fill")
                         .foregroundColor(.red)
@@ -26,6 +23,9 @@ struct ContentView: View {
                 
                 NavigationLink(destination: DeviceIntegrationView()) {
                     Label("Device Sync", systemImage: "iphone.watchface")
+                }
+                NavigationLink(destination: SettingsView()) {
+                    Label("Settings", systemImage: "gear")
                 }
             }
             .navigationTitle("RepSafe")
@@ -41,10 +41,22 @@ struct APIConfig {
     }
 }
 
+extension View {
+    @ViewBuilder func sensoryFeedback<T: Equatable>(if condition: Bool, _ feedback: SensoryFeedback, trigger: T) -> some View {
+        if condition {
+            self.sensoryFeedback(feedback, trigger: trigger)
+        } else {
+            self
+        }
+    }
+}
+
 struct RepCountingView: View {
     let targetReps: Int
     @State private var currentReps: Int = 0
     @State private var timer: Timer?
+    
+    @AppStorage("hapticEnabled") private var hapticEnabled = true
 
     var body: some View {
         VStack {
@@ -53,6 +65,8 @@ struct RepCountingView: View {
                 .foregroundColor(.blue)
         }
         .navigationTitle("Counting")
+        // Use the conditional extension
+        .sensoryFeedback(if: hapticEnabled, .success, trigger: currentReps)
         .onAppear {
             startPolling()
         }
@@ -80,7 +94,7 @@ struct RepCountingView: View {
 
             if let data = data,
                let statusText = String(data: data, encoding: .utf8)?
-                    .trimmingCharacters(in: .whitespacesAndNewlines) {
+                   .trimmingCharacters(in: .whitespacesAndNewlines) {
 
                 DispatchQueue.main.async {
                     if statusText == "COUNT" && currentReps < targetReps {
@@ -194,40 +208,6 @@ struct ExerciseTrackingView: View {
     }
 }
 
-// MARK: - Fatigue Monitoring
-
-struct FatigueMonitoringView: View {
-    @State private var heartRate = 128
-    @State private var fatigueAlert = false
-
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                Text("Heart Rate")
-                    .font(.headline)
-
-                Text("\(heartRate) BPM")
-                    .font(.title2)
-                    .foregroundColor(.pink)
-
-                Toggle("Fatigue Alerts", isOn: $fatigueAlert)
-
-                Text(fatigueAlert ? "Monitoring Active" : "Monitoring Off")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-
-                Button("Simulate Alert") {
-                    fatigueAlert.toggle()
-                }
-                .frame(maxWidth: .infinity)
-                .buttonStyle(.borderedProminent)
-            }
-            .padding()
-        }
-        .navigationTitle("Fatigue")
-    }
-}
-
 // MARK: - Emergency SOS
 
 struct EmergencySOSView: View {
@@ -260,6 +240,18 @@ struct EmergencySOSView: View {
             .padding()
         }
         .navigationTitle("SOS")
+    }
+}
+
+struct SettingsView: View {
+    @AppStorage("hapticEnabled") private var hapticEnabled = true
+
+    var body: some View {
+        Form {
+            Toggle("Haptic Feedback", isOn: $hapticEnabled)
+                .toggleStyle(SwitchToggleStyle(tint: .blue))
+        }
+        .navigationTitle("Settings")
     }
 }
 
