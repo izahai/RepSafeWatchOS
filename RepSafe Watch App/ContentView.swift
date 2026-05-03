@@ -16,17 +16,11 @@ struct ContentView: View {
                 NavigationLink(destination: ExerciseTrackingView()) {
                     Label("Workout Tracking", systemImage: "figure.strengthtraining.traditional")
                 }
-
-                NavigationLink(destination: EmergencySOSView()) {
-                    Label("Emergency SOS", systemImage: "exclamationmark.triangle.fill")
-                        .foregroundColor(.red)
-                }
-                
-                NavigationLink(destination: DeviceIntegrationView()) {
-                    Label("Device Sync", systemImage: "iphone.watchface")
-                }
                 NavigationLink(destination: SettingsView()) {
                     Label("Settings", systemImage: "gear")
+                }
+                NavigationLink(destination: DeviceIntegrationView()) {
+                    Label("Device Sync", systemImage: "iphone.watchface")
                 }
             }
             .navigationTitle("RepSafe")
@@ -296,78 +290,80 @@ struct ExerciseTrackingView: View {
     @State private var showCountingView = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                Text("Reps Count")
-                    .font(.headline)
+        VStack(spacing: 8) {
+            // Header
+            Text("Target Reps")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+
+            // Main Control Row: [ - ]  [ 12 ]  [ + ]
+            HStack(spacing: 10) {
+                Button(action: { reps = max(0, reps - 1) }) {
+                    Image(systemName: "minus")
+                        .fontWeight(.bold)
+                }
+                .buttonStyle(.bordered)
+                .tint(.red.opacity(0.8))
+                .frame(width: 44) // Fixed width for a compact look
 
                 Text("\(reps)")
-                    .font(.system(size: 40, weight: .bold))
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .frame(minWidth: 45) // Prevents jumping when numbers change
                     .foregroundColor(.blue)
 
-                HStack {
-                    Button("-") {
-                        reps = max(0, reps - 1)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .buttonStyle(.bordered)
-
-                    Button("+") {
-                        reps += 1
-                    }
-                    .frame(maxWidth: .infinity)
-                    .buttonStyle(.bordered)
+                Button(action: { reps += 1 }) {
+                    Image(systemName: "plus")
+                        .fontWeight(.bold)
                 }
-                
-                Button("Start") {
-                    showCountingView = true
-                }
-                .frame(maxWidth: .infinity)
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.bordered)
+                .tint(.green.opacity(0.8))
+                .frame(width: 44)
             }
-            .padding()
+            
+            Spacer(minLength: 4)
+
+            // Start Button
+            Button("Start") {
+                showCountingView = true
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
         }
-        .navigationTitle("Workout")
+        .padding(.horizontal)
         .navigationDestination(isPresented: $showCountingView) {
             RepCountingView(targetReps: reps)
         }
     }
 }
 
-// MARK: - Emergency SOS
-
-struct EmergencySOSView: View {
-    @State private var sosEnabled = true
-
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                Image(systemName: "waveform.path.ecg")
-                    .font(.largeTitle)
-                    .foregroundColor(.red)
-
-                Text("Emergency SOS")
-                    .font(.headline)
-
-                Toggle("Auto Detect", isOn: $sosEnabled)
-
-                Button(role: .destructive) {
-                    // Demo only
-                } label: {
-                    Text("Trigger SOS")
-                        .frame(maxWidth: .infinity)
-                }
-
-                Text("Will alert emergency contacts")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-            }
-            .padding()
-        }
-        .navigationTitle("SOS")
-    }
-}
+//struct EmergencySOSView: View {
+//    @State private var sosEnabled = true
+//
+//    var body: some View {
+//        ScrollView {
+//            VStack(spacing: 12) {
+//                Image(systemName: "waveform.path.ecg")
+//                    .font(.largeTitle)
+//                    .foregroundColor(.red)
+//
+//                Text("Emergency SOS")
+//                    .font(.headline)
+//
+//                Toggle("Auto Detect", isOn: $sosEnabled)
+//
+//                Button(role: .destructive) {
+//                    // Demo only
+//                } label: {
+//                    Text("Trigger SOS")
+//                        .frame(maxWidth: .infinity)
+//                }
+//
+//            }
+//            .padding()
+//        }
+//        .navigationTitle("SOS")
+//    }
+//}
 
 struct SettingsView: View {
     @AppStorage("hapticEnabled") private var hapticEnabled = true
