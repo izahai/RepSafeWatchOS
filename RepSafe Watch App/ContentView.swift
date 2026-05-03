@@ -52,13 +52,46 @@ extension View {
     }
 }
 
+class RepCountingSession: NSObject, WKExtendedRuntimeSessionDelegate {
+    static let shared = RepCountingSession()
+    private var extendedSession: WKExtendedRuntimeSession?
+    
+    func start() {
+        guard extendedSession == nil || extendedSession?.state == .invalid else { return }
+        extendedSession = WKExtendedRuntimeSession()
+        extendedSession?.delegate = self
+        extendedSession?.start() // uses Physical Therapy entitlement from Xcode
+    }
+    
+    func stop() {
+        extendedSession?.invalidate()
+        extendedSession = nil
+    }
+    
+    // MARK: - WKExtendedRuntimeSessionDelegate
+    func extendedRuntimeSessionDidStart(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        print("Extended session started")
+    }
+    
+    func extendedRuntimeSession(_ extendedRuntimeSession: WKExtendedRuntimeSession,
+                                 didInvalidateWith reason: WKExtendedRuntimeSessionInvalidationReason,
+                                 error: Error?) {
+        print("Extended session invalidated: \(reason)")
+    }
+    
+    func extendedRuntimeSessionWillExpire(_ extendedRuntimeSession: WKExtendedRuntimeSession) {
+        // Optionally restart before it expires (~60 mins limit)
+        stop()
+        start()
+    }
+}
+
 struct RepCountingView: View {
     let targetReps: Int
     @State private var currentReps: Int = 0
     @State private var timer: Timer?
     
     @AppStorage("hapticEnabled") private var hapticEnabled = true
-    
     @AppStorage("voiceEnabled") private var voiceEnabled = false
     private let speechSynthesizer = AVSpeechSynthesizer()
 
@@ -69,15 +102,22 @@ struct RepCountingView: View {
                 .foregroundColor(.blue)
         }
         .navigationTitle("Counting")
-        // Use the conditional extension
         .sensoryFeedback(if: hapticEnabled, .success, trigger: currentReps)
         .onAppear {
-            try? AVAudioSession.sharedInstance().setCategory(.playback)
+            WKApplication.shared().isAutorotating = false
+            WKExtension.shared().isFrontmostTimeoutExtended = true
+            // Keep audio session active in background
+            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .default)
             try? AVAudioSession.sharedInstance().setActive(true)
+            
+            // Start extended runtime session BEFORE starting the timer
+            RepCountingSession.shared.start()
             startPolling()
         }
         .onDisappear {
+            WKExtension.shared().isFrontmostTimeoutExtended = false
             stopPolling()
+            RepCountingSession.shared.stop()
         }
     }
     
@@ -88,10 +128,13 @@ struct RepCountingView: View {
         utterance.volume = 1.0
         speechSynthesizer.speak(utterance)
     }
+
     private func startPolling() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+        // Use RunLoop.main to ensure timer survives display sleep
+        timer = Timer(timeInterval: 1.0, repeats: true) { _ in
             pollServer()
         }
+        RunLoop.main.add(timer!, forMode: .common)
     }
 
     private func stopPolling() {
@@ -112,13 +155,14 @@ struct RepCountingView: View {
                 DispatchQueue.main.async {
                     if statusText == "COUNT" && currentReps < targetReps {
                         currentReps += 1
-                        
+                        if hapticEnabled {
+                            WKInterfaceDevice.current().play(.success)
+                        }
                         if voiceEnabled {
                             speak(currentReps)
                         }
                     } else if statusText == "DESC" && currentReps > 0 {
                         currentReps -= 1
-                        
                         if voiceEnabled {
                             speak(currentReps)
                         }
@@ -128,6 +172,8 @@ struct RepCountingView: View {
         }.resume()
     }
 }
+
+
 
 // MARK: - Device Integration
 
