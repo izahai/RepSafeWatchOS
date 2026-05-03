@@ -35,7 +35,7 @@ struct ContentView: View {
 }
 
 struct APIConfig {
-    static let baseURL = "http://172.20.10.2:8000"
+    static let baseURL = "http://172.16.11.134:8000"
     
     static var statusURL: URL? {
         URL(string: "\(baseURL)/status")
@@ -90,6 +90,7 @@ struct RepCountingView: View {
     let targetReps: Int
     @State private var currentReps: Int = 0
     @State private var timer: Timer?
+    @State private var isCompleted = false
     
     @AppStorage("hapticEnabled") private var hapticEnabled = true
     @AppStorage("voiceEnabled") private var voiceEnabled = false
@@ -101,21 +102,21 @@ struct RepCountingView: View {
                 .font(.system(size: 40, weight: .bold))
                 .foregroundColor(.blue)
         }
-        .navigationTitle("Counting")
         .sensoryFeedback(if: hapticEnabled, .success, trigger: currentReps)
+        .navigationDestination(isPresented: $isCompleted) {
+            CelebrationView()
+        }
         .onAppear {
             WKApplication.shared().isAutorotating = false
-            WKExtension.shared().isFrontmostTimeoutExtended = true
-            // Keep audio session active in background
+//            WKExtension.shared().isFrontmostTimeoutExtended = true
             try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .default)
             try? AVAudioSession.sharedInstance().setActive(true)
             
-            // Start extended runtime session BEFORE starting the timer
             RepCountingSession.shared.start()
             startPolling()
         }
         .onDisappear {
-            WKExtension.shared().isFrontmostTimeoutExtended = false
+//            WKExtension.shared().isFrontmostTimeoutExtended = false
             stopPolling()
             RepCountingSession.shared.stop()
         }
@@ -130,7 +131,6 @@ struct RepCountingView: View {
     }
 
     private func startPolling() {
-        // Use RunLoop.main to ensure timer survives display sleep
         timer = Timer(timeInterval: 1.0, repeats: true) { _ in
             pollServer()
         }
@@ -155,6 +155,13 @@ struct RepCountingView: View {
                 DispatchQueue.main.async {
                     if statusText == "COUNT" && currentReps < targetReps {
                         currentReps += 1
+                        
+                        if currentReps >= targetReps {
+                            isCompleted = true
+                            stopPolling()
+                            RepCountingSession.shared.stop()
+                        }
+                        
                         if hapticEnabled {
                             WKInterfaceDevice.current().play(.success)
                         }
@@ -173,6 +180,30 @@ struct RepCountingView: View {
     }
 }
 
+struct CelebrationView: View {
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            
+            Image(systemName: "trophy.fill")
+                .font(.largeTitle)
+                .foregroundColor(.yellow)
+            
+            Text("Great Job!")
+                .font(.title2)
+                .fontWeight(.bold)
+            
+            Spacer()
+        }
+        .padding()
+        .contentShape(Rectangle())
+        .onTapGesture {
+            dismiss()
+        }
+    }
+}
 
 
 // MARK: - Device Integration
