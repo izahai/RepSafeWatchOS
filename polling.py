@@ -16,7 +16,8 @@ def status():
     current = state
 
     # AUTO-RESET after sending COUNT
-    if state == "COUNT" or state == "DESC":
+    if (state == "COUNT" or state == "DESC"
+        or state == "QUESTION1" or state == "QUESTION2"):
         state = "ON" 
 
     return current
@@ -56,11 +57,18 @@ def set_count():
     print("🔢 STATE = COUNT")
     return "OK"
 
-@app.route("/question")
-def set_question():
+@app.route("/question1")
+def set_question1():
     global state
-    state = "QUESTION"
-    print("❓ STATE = QUESTION")
+    state = "QUESTION1"
+    print("❓ STATE = QUESTION1")
+    return "OK"
+
+@app.route("/question2")
+def set_question2():
+    global state
+    state = "QUESTION2"
+    print("❓ STATE = QUESTION2")
     return "OK"
 
 @app.route("/desc")
@@ -110,9 +118,15 @@ def send_count():
     except:
         print("❌ Server not reachable")
 
-def send_question():
+def send_question1():
     try:
-        requests.get("http://127.0.0.1:8000/question")
+        requests.get("http://127.0.0.1:8000/question1")
+    except:
+        print("❌ Server not reachable")
+
+def send_question2():
+    try:
+        requests.get("http://127.0.0.1:8000/question2")
     except:
         print("❌ Server not reachable")
         
@@ -135,7 +149,8 @@ def start_ui():
     tk.Button(root, text="SET ALERT", command=send_alert, width=20, height=2).pack(pady=5)
     tk.Button(root, text="SET START", command=send_start, width=20, height=2).pack(pady=5)
     tk.Button(root, text="SET COUNT", command=send_count, width=20, height=2).pack(pady=5)
-    tk.Button(root, text="SET QUESTION", command=send_question, width=20, height=2).pack(pady=5)
+    tk.Button(root, text="SET QUESTION1", command=send_question1, width=20, height=2).pack(pady=5)
+    tk.Button(root, text="SET QUESTION2", command=send_question2, width=20, height=2).pack(pady=5)
     tk.Button(root, text="SET DESC", command=send_desc, width=20, height=2).pack(pady=5)
 
     root.mainloop()

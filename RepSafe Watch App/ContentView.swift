@@ -86,12 +86,18 @@ class RepCountingSession: NSObject, WKExtendedRuntimeSessionDelegate {
     }
 }
 
+// MARK: - RepCountingView
+
 struct RepCountingView: View {
     let targetReps: Int
     @State private var currentReps: Int = 0
     @State private var timer: Timer?
     @State private var isCompleted = false
     
+    // State variables for navigation
+    @State private var showCondition1 = false
+    @State private var showCondition2 = false
+
     @Environment(\.dismiss) var dismiss // Added to dismiss the current view
 
     @AppStorage("hapticEnabled") private var hapticEnabled = true
@@ -112,6 +118,12 @@ struct RepCountingView: View {
                         .foregroundColor(.blue)
                 }
                 .sensoryFeedback(if: hapticEnabled, .success, trigger: currentReps)
+                .navigationDestination(isPresented: $showCondition1) {
+                    SOSTestCondition1View()
+                }
+                .navigationDestination(isPresented: $showCondition2) {
+                    SOSTestCondition2View()
+                }
                 .onAppear {
                     WKApplication.shared().isAutorotating = false
                     try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .default)
@@ -156,7 +168,7 @@ struct RepCountingView: View {
 
             if let data = data,
                let statusText = String(data: data, encoding: .utf8)?
-                   .trimmingCharacters(in: .whitespacesAndNewlines) {
+                .trimmingCharacters(in: .whitespacesAndNewlines) {
 
                 DispatchQueue.main.async {
                     if statusText == "COUNT" && currentReps < targetReps {
@@ -179,6 +191,14 @@ struct RepCountingView: View {
                         if voiceEnabled {
                             speak(currentReps)
                         }
+                    } else if statusText == "QUESTION1" {
+                        stopPolling()
+                        RepCountingSession.shared.stop()
+                        showCondition1 = true
+                    } else if statusText == "QUESTION2" {
+                        stopPolling()
+                        RepCountingSession.shared.stop()
+                        showCondition2 = true
                     }
                 }
             }
@@ -376,10 +396,6 @@ struct SOSTestCondition1View: View {
                 .font(.headline)
                 .foregroundColor(.red)
 
-            Text("Condition 1: Beep sound")
-                .font(.caption2)
-                .foregroundColor(.gray)
-
             Text("\(countdown)s")
                 .font(.title)
                 .fontWeight(.bold)
@@ -398,7 +414,6 @@ struct SOSTestCondition1View: View {
             }
             .padding(.horizontal)
         }
-        .navigationTitle("SOS Test 1")
         .onAppear {
             startCountdown()
         }
@@ -450,10 +465,6 @@ struct SOSTestCondition2View: View {
                 .font(.headline)
                 .foregroundColor(.red)
 
-            Text("Condition 2: Haptic feedback")
-                .font(.caption2)
-                .foregroundColor(.gray)
-
             Text("\(countdown)s")
                 .font(.title)
                 .fontWeight(.bold)
@@ -499,7 +510,6 @@ struct SOSTestCondition2View: View {
             .frame(height: 50)
             .padding(.horizontal)
         }
-        .navigationTitle("SOS Test 2")
         .onAppear {
             startCountdown()
         }
