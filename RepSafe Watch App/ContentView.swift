@@ -92,33 +92,39 @@ struct RepCountingView: View {
     @State private var timer: Timer?
     @State private var isCompleted = false
     
+    @Environment(\.dismiss) var dismiss // Added to dismiss the current view
+
     @AppStorage("hapticEnabled") private var hapticEnabled = true
     @AppStorage("voiceEnabled") private var voiceEnabled = false
     private let speechSynthesizer = AVSpeechSynthesizer()
 
     var body: some View {
-        VStack {
-            Text("\(currentReps)/\(targetReps)")
-                .font(.system(size: 40, weight: .bold))
-                .foregroundColor(.blue)
-        }
-        .sensoryFeedback(if: hapticEnabled, .success, trigger: currentReps)
-        .navigationDestination(isPresented: $isCompleted) {
-            CelebrationView()
-        }
-        .onAppear {
-            WKApplication.shared().isAutorotating = false
-//            WKExtension.shared().isFrontmostTimeoutExtended = true
-            try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .default)
-            try? AVAudioSession.sharedInstance().setActive(true)
-            
-            RepCountingSession.shared.start()
-            startPolling()
-        }
-        .onDisappear {
-//            WKExtension.shared().isFrontmostTimeoutExtended = false
-            stopPolling()
-            RepCountingSession.shared.stop()
+        Group {
+            if isCompleted {
+                CelebrationView()
+                    .onTapGesture {
+                        dismiss() // Dismisses RepCountingView and returns to ExerciseTrackingView
+                    }
+            } else {
+                VStack {
+                    Text("\(currentReps)/\(targetReps)")
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(.blue)
+                }
+                .sensoryFeedback(if: hapticEnabled, .success, trigger: currentReps)
+                .onAppear {
+                    WKApplication.shared().isAutorotating = false
+                    try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, policy: .default)
+                    try? AVAudioSession.sharedInstance().setActive(true)
+                    
+                    RepCountingSession.shared.start()
+                    startPolling()
+                }
+                .onDisappear {
+                    stopPolling()
+                    RepCountingSession.shared.stop()
+                }
+            }
         }
     }
     
