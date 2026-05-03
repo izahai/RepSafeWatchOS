@@ -16,7 +16,7 @@ def status():
     current = state
 
     # AUTO-RESET after sending COUNT
-    if (state == "COUNT" or state == "DESC"
+    if (state == "COUNT" or state == "DESC" or state == "ALERT"
         or state == "QUESTION1" or state == "QUESTION2"):
         state = "ON" 
 

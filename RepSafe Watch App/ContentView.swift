@@ -91,6 +91,7 @@ struct RepCountingView: View {
     // State variables for navigation
     @State private var showCondition1 = false
     @State private var showCondition2 = false
+    @State private var showEmergencySOS = false // New state for SOS navigation
 
     @Environment(\.dismiss) var dismiss // Added to dismiss the current view
 
@@ -117,6 +118,9 @@ struct RepCountingView: View {
                 }
                 .navigationDestination(isPresented: $showCondition2) {
                     SOSTestCondition2View()
+                }
+                .navigationDestination(isPresented: $showEmergencySOS) { // Added destination for Emergency SOS
+                    EmergencySOSView()
                 }
                 .onAppear {
                     WKApplication.shared().isAutorotating = false
@@ -193,6 +197,10 @@ struct RepCountingView: View {
                         stopPolling()
                         RepCountingSession.shared.stop()
                         showCondition2 = true
+                    } else if statusText == "ALERT" { // Added handler for ALERT state
+                        stopPolling()
+                        RepCountingSession.shared.stop()
+                        showEmergencySOS = true
                     }
                 }
             }
@@ -336,34 +344,73 @@ struct ExerciseTrackingView: View {
     }
 }
 
-//struct EmergencySOSView: View {
-//    @State private var sosEnabled = true
-//
-//    var body: some View {
-//        ScrollView {
-//            VStack(spacing: 12) {
-//                Image(systemName: "waveform.path.ecg")
-//                    .font(.largeTitle)
-//                    .foregroundColor(.red)
-//
-//                Text("Emergency SOS")
-//                    .font(.headline)
-//
-//                Toggle("Auto Detect", isOn: $sosEnabled)
-//
-//                Button(role: .destructive) {
-//                    // Demo only
-//                } label: {
-//                    Text("Trigger SOS")
-//                        .frame(maxWidth: .infinity)
-//                }
-//
-//            }
-//            .padding()
-//        }
-//        .navigationTitle("SOS")
-//    }
-//}
+// MARK: - EmergencySOSView
+
+struct EmergencySOSView: View {
+    @State private var sosEnabled = true
+    @State private var isPulsing = false
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                // Animated Icon with Pulsing Effect
+                ZStack {
+                    Circle()
+                        .fill(Color.red.opacity(0.3))
+                        .frame(width: 80, height: 80)
+                        .scaleEffect(isPulsing ? 1.5 : 1.0)
+                        .opacity(isPulsing ? 0.0 : 1.0)
+                        .animation(
+                            .easeInOut(duration: 1.5)
+                            .repeatForever(autoreverses: false),
+                            value: isPulsing
+                        )
+
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 56, height: 56)
+
+                    Image(systemName: "waveform.path.ecg")
+                        .font(.title2)
+                        .foregroundColor(.white)
+                }
+                .padding(.vertical, 8)
+
+                Text("Emergency SOS")
+                    .font(.headline)
+                    .fontWeight(.bold)
+
+                Text("Ready to send emergency alert")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+
+                Toggle("Auto Detect", isOn: $sosEnabled)
+                    .tint(.red)
+                    .padding(.horizontal, 4)
+
+                Button(role: .destructive) {
+                    // Trigger SOS logic here
+                } label: {
+                    Text("Trigger SOS")
+                        .frame(maxWidth: .infinity)
+                        .fontWeight(.bold)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .padding(.horizontal, 4)
+            }
+            .padding(.horizontal)
+        }
+        .navigationTitle("SOS")
+        .onAppear {
+            isPulsing = true
+        }
+        .onDisappear {
+            isPulsing = false
+        }
+    }
+}
 
 struct SettingsView: View {
     @AppStorage("hapticEnabled") private var hapticEnabled = true
@@ -388,7 +435,7 @@ struct SOSTestCondition1View: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Text("Emergency Alert")
+            Text("Are you OK?")
                 .font(.headline)
                 .foregroundColor(.red)
 
@@ -457,7 +504,7 @@ struct SOSTestCondition2View: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            Text("Emergency Alert")
+            Text("Are you OK?")
                 .font(.headline)
                 .foregroundColor(.red)
 
