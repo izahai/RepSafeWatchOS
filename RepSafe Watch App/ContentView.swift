@@ -29,7 +29,7 @@ struct ContentView: View {
 }
 
 struct APIConfig {
-    static let baseURL = "http://172.16.11.134:8000"
+    static let baseURL = "http://192.168.98.54:8000"
     
     static var statusURL: URL? {
         URL(string: "\(baseURL)/status")
@@ -431,6 +431,7 @@ struct SettingsView: View {
 struct SOSTestCondition1View: View {
     @State private var countdown = 10
     @State private var timer: Timer?
+    @State private var showEmergencySOS = false // New state for navigation
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
@@ -447,6 +448,7 @@ struct SOSTestCondition1View: View {
             Button(action: {
                 cancelSOS()
             }) {
+                // ... same button UI ...
                 Text("Cancel SOS")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
@@ -456,6 +458,10 @@ struct SOSTestCondition1View: View {
                     .cornerRadius(12)
             }
             .padding(.horizontal)
+        }
+        // Added navigation destination
+        .navigationDestination(isPresented: $showEmergencySOS) {
+            EmergencySOSView()
         }
         .onAppear {
             startCountdown()
@@ -472,21 +478,19 @@ struct SOSTestCondition1View: View {
                 playBeep()
             } else {
                 stopTimer()
+                showEmergencySOS = true // Trigger navigation to SOS
             }
         }
     }
 
+    // ... stopTimer, playBeep, and cancelSOS remain the same ...
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
     }
 
     private func playBeep() {
-        #if os(watchOS)
         WKInterfaceDevice.current().play(.click)
-        #else
-        AudioServicesPlaySystemSound(1052)
-        #endif
     }
 
     private func cancelSOS() {
@@ -498,9 +502,9 @@ struct SOSTestCondition1View: View {
 struct SOSTestCondition2View: View {
     @State private var countdown = 10
     @State private var timer: Timer?
-    @Environment(\.dismiss) var dismiss
-
+    @State private var showEmergencySOS = false // New state for navigation
     @State private var dragOffset: CGFloat = 0
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         VStack(spacing: 16) {
@@ -553,6 +557,10 @@ struct SOSTestCondition2View: View {
             .frame(height: 50)
             .padding(.horizontal)
         }
+        // Added navigation destination
+        .navigationDestination(isPresented: $showEmergencySOS) {
+            EmergencySOSView()
+        }
         .onAppear {
             startCountdown()
         }
@@ -568,19 +576,19 @@ struct SOSTestCondition2View: View {
                 triggerHaptic()
             } else {
                 stopTimer()
+                showEmergencySOS = true // Trigger navigation to SOS
             }
         }
     }
 
+    // ... stopTimer, triggerHaptic, and cancelSOS remain the same ...
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
     }
 
     private func triggerHaptic() {
-        #if os(watchOS)
         WKInterfaceDevice.current().play(.notification)
-        #endif
     }
 
     private func cancelSOS() {
