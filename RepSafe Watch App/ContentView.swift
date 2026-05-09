@@ -349,6 +349,9 @@ struct ExerciseTrackingView: View {
 struct EmergencySOSView: View {
     @State private var sosEnabled = true
     @State private var isPulsing = false
+    @State private var alarmTimer: Timer?
+    
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         ScrollView {
@@ -358,10 +361,10 @@ struct EmergencySOSView: View {
                     Circle()
                         .fill(Color.red.opacity(0.3))
                         .frame(width: 80, height: 80)
-                        .scaleEffect(isPulsing ? 1.5 : 1.0)
-                        .opacity(isPulsing ? 0.0 : 1.0)
+                        .scaleEffect(isPulsing ? 1.4 : 1.0)
+                        .opacity(isPulsing ? 0.0 : 0.7)
                         .animation(
-                            .easeInOut(duration: 1.5)
+                            .easeInOut(duration: 1.0)
                             .repeatForever(autoreverses: false),
                             value: isPulsing
                         )
@@ -379,8 +382,9 @@ struct EmergencySOSView: View {
                 Text("Emergency SOS")
                     .font(.headline)
                     .fontWeight(.bold)
+                    .foregroundColor(.red)
 
-                Text("Ready to send emergency alert")
+                Text("Alerting emergency contacts...")
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -389,25 +393,72 @@ struct EmergencySOSView: View {
                     .tint(.red)
                     .padding(.horizontal, 4)
 
-                Button(role: .destructive) {
-                    // Trigger SOS logic here
-                } label: {
-                    Text("Trigger SOS")
-                        .frame(maxWidth: .infinity)
-                        .fontWeight(.bold)
+                VStack(spacing: 8) {
+                    Button(role: .destructive) {
+                        // Trigger actual SOS API call
+                        print("SOS Triggered!")
+                    } label: {
+                        Text("Trigger SOS")
+                            .frame(maxWidth: .infinity)
+                            .fontWeight(.bold)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+
+                    Button("Cancel") {
+                        stopAlarm()
+                        dismiss()
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
                 .padding(.horizontal, 4)
             }
             .padding(.horizontal)
         }
         .navigationTitle("SOS")
+        .navigationBarBackButtonHidden(true)
         .onAppear {
             isPulsing = true
+            startAlarm()
+            setupMaxVolume()
         }
         .onDisappear {
-            isPulsing = false
+            stopAlarm()
+        }
+    }
+
+    // MARK: - Built-in Alarm Logic
+    
+    private func startAlarm() {
+        playSystemSound()
+        
+        // Using a 1-second interval for a repeating pulse
+        alarmTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            playSystemSound()
+        }
+    }
+
+    private func playSystemSound() {
+        // '.retry' is a strong, urgent double-beep/vibration
+        // '.failure' is also a good alternative for a "wrong/danger" sound
+        WKInterfaceDevice.current().play(.retry)
+    }
+
+    private func stopAlarm() {
+        isPulsing = false
+        alarmTimer?.invalidate()
+        alarmTimer = nil
+    }
+    
+    private func setupMaxVolume() {
+        let session = AVAudioSession.sharedInstance()
+        do {
+            // .playback or .alarm category helps bypass the silent switch in some contexts
+            // and ensures it plays through the speaker at the intended level.
+            try session.setCategory(.playback, mode: .default, options: [.duckOthers])
+            try session.setActive(true)
+        } catch {
+            print("Failed to set audio session: \(error)")
         }
     }
 }
